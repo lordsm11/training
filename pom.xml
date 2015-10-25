@@ -89,6 +89,11 @@
             <version>${appengine.target.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.googlecode.objectify</groupId>
+            <artifactId>objectify</artifactId>
+            <version>4.0.1</version>
+        </dependency>
 
     </dependencies>
 

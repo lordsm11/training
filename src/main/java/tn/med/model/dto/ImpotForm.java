@@ -47,4 +47,15 @@ public class ImpotForm {
     public void setNbChildren(String nbChildren) {
         this.nbChildren = nbChildren;
     }
+
+    @Override
+    public String toString() {
+        return "ImpotForm{" +
+                "amount1='" + amount1 + '\'' +
+                ", amount2='" + amount2 + '\'' +
+                ", deductions='" + deductions + '\'' +
+                ", onePart=" + onePart +
+                ", nbChildren='" + nbChildren + '\'' +
+                '}';
+    }
 }

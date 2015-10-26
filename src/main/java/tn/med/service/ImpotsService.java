@@ -1,16 +1,13 @@
 package tn.med.service;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tn.med.database.ImpotsPersistance;
 import tn.med.model.business.ImpotInfo;
 import tn.med.model.business.ImpotInfoBuilder;
 import tn.med.model.constants.ImpotEnum;
 import tn.med.model.dto.ImpotForm;
 import tn.med.model.dto.SimulationImpotDto;
+import tn.med.persistance.ImpotsDao;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -21,14 +18,15 @@ public class ImpotsService {
     private static BigDecimal TAUX_CHARGE = BigDecimal.valueOf(90);
     private static BigDecimal CENT = BigDecimal.valueOf(100);
 
-    @Autowired ImpotsPersistance impotsPersistance;
+    @Autowired
+    private ImpotsDao impotsDao;
 
     public SimulationImpotDto calculateImpots(ImpotForm impotForm){
         ImpotInfo impotInfo = new ImpotInfoBuilder().withImpotForm(impotForm).build();
         BigDecimal amount = substractCharges(impotInfo.getAmount());
         BigDecimal impot = calculateImpots(amount,impotInfo.getNbParts());
         BigDecimal taux = impot.multiply(CENT).divide(amount,2,RoundingMode.HALF_UP);
-        impotsPersistance.saveObject(impotForm,impotInfo,impot);
+        impotsDao.saveObject(impotForm,impotInfo,impot);
         return new SimulationImpotDto(amount+"",impotInfo.getNbParts()+"",impot+"",taux+"");
     }
 

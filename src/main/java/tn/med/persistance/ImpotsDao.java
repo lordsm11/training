@@ -1,4 +1,4 @@
-package tn.med.database;
+package tn.med.persistance;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -10,7 +10,7 @@ import tn.med.model.dto.ImpotForm;
 import java.math.BigDecimal;
 
 @Service
-public class ImpotsPersistance {
+public class ImpotsDao {
 
     public void saveObject(ImpotForm impotForm, ImpotInfo impotInfo, BigDecimal impot) {
 

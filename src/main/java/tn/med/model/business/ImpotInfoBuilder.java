@@ -9,22 +9,21 @@ public class ImpotInfoBuilder {
 
     private ImpotForm impotForm;
 
-    public ImpotInfoBuilder() {}
+    public ImpotInfoBuilder() {
+
+    }
 
     public ImpotInfo build() {
 
         BigDecimal amount1 = DecimalUtils.convertToBigDecimal(impotForm.getAmount1())
                 .subtract(DecimalUtils.convertToBigDecimal(impotForm.getDeductions()));
-        boolean isOnePart = impotForm.isOnePart();
+        boolean isOnePart = impotForm.isCelibataire();
 
         if(isOnePart) {
             return new ImpotInfo(amount1,BigDecimal.ONE);
         }else {
             BigDecimal amount2 = DecimalUtils.convertToBigDecimal(impotForm.getAmount2());
-
-            Integer nbChildren = DecimalUtils.convertToInteger(impotForm.getNbChildren());
-            double nbParts = 2 + ((nbChildren <= 2)? nbChildren * 0.5 : 3 + (nbChildren-2));
-
+            double nbParts = 2 + ((impotForm.getNbChildren() <= 2)? impotForm.getNbChildren() * 0.5 : 3 + (impotForm.getNbChildren()-2));
             return new ImpotInfo(amount1.add(amount2),BigDecimal.valueOf(nbParts));
         }
     }

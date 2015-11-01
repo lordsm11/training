@@ -1,27 +1,25 @@
 package tn.med.controller;
 
-import com.google.appengine.api.log.LogQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 import tn.med.model.dto.ImpotForm;
-import tn.med.model.dto.SimulationImpotDto;
 import tn.med.service.ImpotsService;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import tn.med.validator.ImpotsValidator;
 
 @Controller
 @RequestMapping(value="impots")
 public class ImpotsController {
 
-    private static final Logger log = Logger.getLogger(ImpotsController.class.getName());
-
     @Autowired
     private ImpotsService impotsService;
+
+    @Autowired
+    private ImpotsValidator impotsValidator;
 
     @RequestMapping(method = RequestMethod.GET)
     public ModelAndView get() {
@@ -29,12 +27,13 @@ public class ImpotsController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public ModelAndView post(@ModelAttribute("impotForm") ImpotForm impot) {
-        log.setLevel(Level.INFO);
-        log.info("impotForm : " + impot.toString());
-        ModelAndView model = new ModelAndView("impots");
-        model.addObject("simulationImpot",impotsService.calculateImpots(impot));
-        return model;
+    public ModelAndView post(@ModelAttribute("impotForm")ImpotForm impot, BindingResult bindingResult) {
+        impotsValidator.validate(impot, bindingResult);
+
+        if(bindingResult.hasFieldErrors()){
+            return new ModelAndView("impots");
+        }
+        return new ModelAndView("impotsResultat","simulationImpot",impotsService.calculateImpots(impot));
     }
 
 }

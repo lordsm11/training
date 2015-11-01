@@ -1,13 +1,11 @@
 package tn.med.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tn.med.model.business.ImpotInfo;
 import tn.med.model.business.ImpotInfoBuilder;
 import tn.med.model.constants.ImpotEnum;
 import tn.med.model.dto.ImpotForm;
 import tn.med.model.dto.SimulationImpotDto;
-import tn.med.persistance.ImpotsDao;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -18,16 +16,26 @@ public class ImpotsService {
     private static BigDecimal TAUX_CHARGE = BigDecimal.valueOf(90);
     private static BigDecimal CENT = BigDecimal.valueOf(100);
 
-    @Autowired
-    private ImpotsDao impotsDao;
-
     public SimulationImpotDto calculateImpots(ImpotForm impotForm){
         ImpotInfo impotInfo = new ImpotInfoBuilder().withImpotForm(impotForm).build();
         BigDecimal amount = substractCharges(impotInfo.getAmount());
         BigDecimal impot = calculateImpots(amount,impotInfo.getNbParts());
         BigDecimal taux = impot.multiply(CENT).divide(amount,2,RoundingMode.HALF_UP);
-        impotsDao.saveObject(impotForm,impotInfo,impot);
-        return new SimulationImpotDto(amount+"",impotInfo.getNbParts()+"",impot+"",taux+"");
+        String situation = retrieveSituation(impotForm);
+        return new SimulationImpotDto(impotInfo.getAmount()+" €",impotInfo.getNbParts()+"",impot+" €",taux+" %",situation);
+    }
+
+    private String retrieveSituation(ImpotForm impotForm) {
+        if (impotForm.isCelibataire()) {
+            return "Célibataire";
+        }
+        if(impotForm.getNbChildren() == 0) {
+            return "Marié";
+        }
+        if(impotForm.getNbChildren() == 1) {
+            return "Marié avec 1 enfant";
+        }
+        return "Marié avec "+impotForm.getNbChildren()+" enfants";
     }
 
     private BigDecimal substractCharges(BigDecimal amount) {

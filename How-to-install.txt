@@ -1,0 +1,4 @@
+mvn jacoco:prepare-agent test jacoco:report
+mvn sonar:sonar
+
+appcfg -A mad-engineering update target\appengine-try-java-1.0

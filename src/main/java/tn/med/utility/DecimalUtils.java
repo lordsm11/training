@@ -4,19 +4,15 @@ import java.math.BigDecimal;
 
 public class DecimalUtils {
 
+    private DecimalUtils() {
+
+    }
+
     public static BigDecimal convertToBigDecimal(String number) {
         try {
             return new BigDecimal(number);
         }catch (NumberFormatException e){
             return BigDecimal.ZERO;
-        }
-    }
-
-    public static Integer convertToInteger(String number) {
-        try {
-            return new Integer(number);
-        }catch (NumberFormatException e){
-            return 0;
         }
     }
 

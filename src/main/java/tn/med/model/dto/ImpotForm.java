@@ -1,12 +1,12 @@
 package tn.med.model.dto;
 
 public class ImpotForm {
-    
+
     private String amount1;
     private String amount2;
     private String deductions;
-    private boolean onePart;
-    private String nbChildren;
+    private int onePart;
+    private int nbChildren;
 
     public String getAmount1() {
         return amount1;
@@ -32,19 +32,23 @@ public class ImpotForm {
         this.deductions = deductions;
     }
 
-    public boolean isOnePart() {
+    public int getOnePart() {
         return onePart;
     }
 
-    public void setOnePart(boolean onePart) {
+    public boolean isCelibataire() {
+        return 0 == onePart;
+    }
+
+    public void setOnePart(int onePart) {
         this.onePart = onePart;
     }
 
-    public String getNbChildren() {
+    public int getNbChildren() {
         return nbChildren;
     }
 
-    public void setNbChildren(String nbChildren) {
+    public void setNbChildren(int nbChildren) {
         this.nbChildren = nbChildren;
     }
 

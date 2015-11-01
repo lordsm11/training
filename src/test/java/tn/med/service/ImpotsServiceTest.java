@@ -6,21 +6,14 @@ import static org.hamcrest.CoreMatchers.is;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
 
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
-import tn.med.model.business.ImpotInfo;
-import tn.med.model.business.ImpotInfoBuilder;
 import tn.med.model.constants.ImpotEnum;
 import tn.med.model.dto.ImpotForm;
 import tn.med.model.dto.SimulationImpotDto;
-import tn.med.persistance.ImpotsDao;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -33,9 +26,6 @@ public class ImpotsServiceTest extends AbstractJUnit4SpringContextTests {
         MockitoAnnotations.initMocks(this);
     }
 
-    @Mock
-    private ImpotsDao impotsDao;
-
     @InjectMocks
     @Autowired
     private ImpotsService impotsService;
@@ -45,29 +35,27 @@ public class ImpotsServiceTest extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void calculateImpotsTotalOnePartTest(){
-        doNothing().when(impotsDao).saveObject(any(ImpotForm.class), any(ImpotInfo.class), any(BigDecimal.class));
         ImpotForm impotForm = new ImpotForm();
-        impotForm.setOnePart(true);
+        impotForm.setOnePart(0);
         impotForm.setAmount1("24000");
         impotForm.setDeductions("3000");
         SimulationImpotDto simulationImpotDto = impotsService.calculateImpots(impotForm);
-        assertThat(simulationImpotDto.getImpot(),is("1287.86"));
+        assertThat(simulationImpotDto.getImpot(),is("1287.86 €"));
         assertThat(simulationImpotDto.getNbParts(),is("1"));
-        assertThat(simulationImpotDto.getTaux(),is("6.81"));
+        assertThat(simulationImpotDto.getTaux(),is("6.81 %"));
     }
 
     @Test
     public void calculateImpotsTotalTwoPartsTest(){
-        doNothing().when(impotsDao).saveObject(any(ImpotForm.class), any(ImpotInfo.class), any(BigDecimal.class));
         ImpotForm impotForm = new ImpotForm();
-        impotForm.setOnePart(false);
+        impotForm.setOnePart(1);
         impotForm.setAmount1("24000");
         impotForm.setAmount2("10000");
         impotForm.setDeductions("3000");
         SimulationImpotDto simulationImpotDto = impotsService.calculateImpots(impotForm);
-        assertThat(simulationImpotDto.getImpot(),is("1189.72"));
+        assertThat(simulationImpotDto.getImpot(),is("1189.72 €"));
         assertThat(simulationImpotDto.getNbParts(),is("2.0"));
-        assertThat(simulationImpotDto.getTaux(),is("4.26"));
+        assertThat(simulationImpotDto.getTaux(),is("4.26 %"));
     }
 
     @Test
@@ -99,13 +87,33 @@ public class ImpotsServiceTest extends AbstractJUnit4SpringContextTests {
         assertThat(calculateImpotsPlage(BigDecimal.valueOf(200000), ImpotEnum.TRANCHE4, BigDecimal.ONE).doubleValue(), is(21551.4d));
     }
 
+    @Test
+    public void retrieveSituationTest() throws Exception {
+        ImpotForm impotForm = new ImpotForm();
+
+        impotForm.setOnePart(0);
+        assertThat(retrieveSituation(impotForm), is("Célibataire"));
+
+        impotForm.setOnePart(1);
+        impotForm.setNbChildren(0);
+        assertThat(retrieveSituation(impotForm), is("Marié"));
+
+        impotForm.setNbChildren(1);
+        assertThat(retrieveSituation(impotForm), is("Marié avec 1 enfant"));
+
+        impotForm.setNbChildren(2);
+        assertThat(retrieveSituation(impotForm), is("Marié avec 2 enfants"));
+
+    }
+
+
     private BigDecimal substractCharges(BigDecimal amount)  throws Exception{
         Method method = impotsService.getClass().getDeclaredMethod("substractCharges", BigDecimal.class);
         method.setAccessible(true);
         return (BigDecimal)method.invoke(impotsService,amount);
     }
 
-    private BigDecimal calculateImpots(BigDecimal amount, BigDecimal nbParts)  throws Exception{
+    private BigDecimal calculateImpots(BigDecimal amount, BigDecimal nbParts) throws Exception{
         Method method = impotsService.getClass().getDeclaredMethod("calculateImpots", BigDecimal.class, BigDecimal.class);
         method.setAccessible(true);
         return (BigDecimal)method.invoke(impotsService,amount,nbParts);
@@ -115,6 +123,12 @@ public class ImpotsServiceTest extends AbstractJUnit4SpringContextTests {
         Method method = impotsService.getClass().getDeclaredMethod("calculateImpotsPlage", BigDecimal.class, ImpotEnum.class, BigDecimal.class);
         method.setAccessible(true);
         return (BigDecimal)method.invoke(impotsService,amount,impotEnum,nbParts);
+    }
+
+    private String retrieveSituation(ImpotForm impotForm) throws Exception{
+        Method method = impotsService.getClass().getDeclaredMethod("retrieveSituation", ImpotForm.class);
+        method.setAccessible(true);
+        return (String)method.invoke(impotsService,impotForm);
     }
 
 }
